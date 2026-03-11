@@ -114,6 +114,72 @@ Press `Ctrl + C` in the PowerShell window.
 - Voice generation runs locally (Kokoro)
 - No accounts, no API keys, no cloud
 
+---
+
+## How it works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Your Browser                        │
+│              (PC, Phone, Tablet — HTTPS)                │
+│                                                         │
+│   🎤 Microphone ──► Record ──► Send audio to server     │
+│                                                         │
+│   💬 Chat display ◄── text response                     │
+│   🔊 Speaker      ◄── audio response                   │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                    HTTPS (LAN)
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│                   Gradio Server                         │
+│                    (app.py)                              │
+│                                                         │
+│  ┌───────────┐   ┌───────────┐   ┌───────────────────┐ │
+│  │ Moonshine │   │ Mistral   │   │      Kokoro       │ │
+│  │   (STT)   │   │ 7B (LLM)  │   │      (TTS)       │ │
+│  │           │   │           │   │                   │ │
+│  │ Audio ──► │   │ Text ──►  │   │ Text ──► Audio    │ │
+│  │ Text      │   │ Response  │   │ (spoken reply)    │ │
+│  └─────┬─────┘   └─────┬─────┘   └────────┬──────────┘ │
+│        │               │                   │            │
+│        └──► step 1     └──► step 2         └──► step 3  │
+│             "hello"         "Hi! How are         🔊     │
+│                              you today?"                │
+└─────────────────────────────────────────────────────────┘
+         ▲                    │
+         │              localhost:11434
+         │                    ▼
+    ┌────┴────────────────────────────┐
+    │           Ollama                │
+    │    (runs natively on your PC)   │
+    │    Model: mistral:7b-instruct   │
+    └─────────────────────────────────┘
+```
+
+### Pipeline: what happens when you speak
+
+1. **You speak** → browser records audio via microphone
+2. **Moonshine (STT)** → converts your speech to text using FastRTC's built-in speech-to-text model (runs on CPU via ONNX)
+3. **Mistral 7B (LLM)** → your text is sent to Ollama, which generates a conversational English reply
+4. **Kokoro (TTS)** → the reply text is converted to natural-sounding speech using FastRTC's text-to-speech model (runs on CPU via ONNX)
+5. **Browser** → receives both the text (shown in chat) and audio (played out loud)
+
+All 3 AI models run locally on your machine. No data leaves your computer.
+
+---
+
+## Tech stack
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Web UI** | [Gradio](https://gradio.app/) | Browser interface with mic input, chat, and audio playback |
+| **Speech-to-Text** | [Moonshine](https://github.com/usefulsensors/moonshine) (via FastRTC) | Converts your voice to text — fast, lightweight, runs on CPU |
+| **LLM** | [Mistral 7B Instruct](https://mistral.ai/) (via [Ollama](https://ollama.com/)) | Generates conversational English responses |
+| **Text-to-Speech** | [Kokoro](https://github.com/hexgrad/kokoro) (via FastRTC) | Converts AI text response to natural speech |
+| **Package manager** | [uv](https://docs.astral.sh/uv/) | Fast Python dependency management |
+| **HTTPS** | Self-signed certificate (via `cryptography`) | Enables microphone access from phones/tablets on LAN |
+
 When you speak, your audio is:
 1. Transcribed to text using Moonshine
 2. Sent to a local LLM via Ollama for processing

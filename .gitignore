@@ -32,6 +32,14 @@ build.log
 cert.pem
 key.pem
 
+# Docker (not used)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Copilot / editor config (local only)
+.github/
+
 # OS / editor files
 .DS_Store
 Thumbs.db

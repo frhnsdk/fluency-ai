@@ -2,19 +2,32 @@
 
 Talk to an AI in English — it listens, understands, and talks back. Everything runs on your own computer. No internet required after setup.
 
+## Demo
+
+<div align="center">
+  <a href="https://youtube.com/shorts/kIwkFEdDo54?feature=share">
+    <img src="https://img.youtube.com/vi/kIwkFEdDo54/0.jpg" alt="Fluency AI Demo" width="400">
+    <br>
+    <strong>▶ Click to watch demo</strong>
+  </a>
+</div>
+
 ---
 
 ## What you need before starting
 
-Install these three programs first. Click each link, download, and run the installer:
+Install these programs first. Click each link, download, and run the installer:
 
 1. **Python 3.13** — https://www.python.org/downloads/
    - During install, **check the box that says "Add Python to PATH"**
 
-2. **Docker Desktop** — https://www.docker.com/products/docker-desktop/
-   - After installing, open Docker Desktop and wait until it says **"Docker Desktop is running"** in the bottom-left corner
+2. **Git** — https://git-scm.com/downloads
+   - Use the default options during install
 
-3. **uv** — open **PowerShell** (press `Windows key`, type `PowerShell`, press Enter) and paste this:
+3. **Ollama** — https://ollama.com/download
+   - After installing, it runs in the background automatically
+
+4. **uv** (Python package manager) — open **PowerShell** (press `Windows key`, type `PowerShell`, press Enter) and paste this:
    ```powershell
    irm https://astral.sh/uv/install.ps1 | iex
    ```
@@ -26,22 +39,17 @@ Install these three programs first. Click each link, download, and run the insta
 
 Open **PowerShell** and run these commands one at a time:
 
-### Step 1 — Go to the project folder
+### Step 1 — Clone the project
 ```powershell
-cd f:\Fluency-ai
+git clone https://github.com/frhnsdk/fluency-ai.git
+cd fluency-ai
 ```
 
-### Step 2 — Start the AI brain (Ollama)
+### Step 2 — Download the AI model
 ```powershell
-docker compose up -d
+ollama pull mistral:7b-instruct
 ```
-This downloads and starts the AI model. **Wait about 2 minutes** the first time — it's downloading a large file.
-
-You can check it's ready by running:
-```powershell
-docker ps
-```
-You should see `fluency-ollama` with status `healthy`.
+This downloads the AI brain. **Wait a few minutes** the first time — it's a large file (~4 GB).
 
 ### Step 3 — Install Python dependencies
 ```powershell
@@ -49,7 +57,7 @@ uv sync
 ```
 This installs everything the app needs. Wait for it to finish.
 
-### Step 4 — Allow the app through the firewall (one-time)
+### Step 4 — Allow the app through the firewall (one-time, for phone access)
 ```powershell
 New-NetFirewallRule -DisplayName "Fluency AI" -Direction Inbound -Protocol TCP -LocalPort 7860 -Action Allow
 ```
@@ -58,17 +66,9 @@ New-NetFirewallRule -DisplayName "Fluency AI" -Direction Inbound -Protocol TCP -
 
 ## Running the app (every time)
 
-### 1. Make sure Docker Desktop is open and running
-
-### 2. Start Ollama (if not already running)
+### 1. Start the app
 ```powershell
-cd f:\Fluency-ai
-docker compose up -d
-```
-
-### 3. Start the app
-```powershell
-cd f:\Fluency-ai
+cd fluency-ai
 uv run python app.py
 ```
 
@@ -77,10 +77,12 @@ Wait until you see this line in the output:
 * Running on local URL:  https://0.0.0.0:7860
 ```
 
-### 4. Open in browser
+### 2. Open in browser
 
-- **On this PC**: open your browser and go to → `https://localhost:7860`
-- **On phone or other devices** (same Wi-Fi): go to → `https://192.168.0.103:7860`
+- **On this PC**: go to → `https://localhost:7860`
+- **On phone or other devices** (same Wi-Fi): go to → `https://<your-pc-ip>:7860`
+
+> To find your PC's IP, run `ipconfig` in PowerShell and look for **IPv4 Address** under your Wi-Fi adapter.
 
 > **Browser warning**: The browser will show a security warning the first time.
 > Click **Advanced** → **Proceed to ... (unsafe)** — this is safe, it's just because we use a self-made certificate.
@@ -100,13 +102,7 @@ Click **Clear** to start a new conversation.
 
 ## Stopping the app
 
-To stop the app, press `Ctrl + C` in the PowerShell window.
-
-To stop Ollama:
-```powershell
-cd f:\Fluency-ai
-docker compose down
-```
+Press `Ctrl + C` in the PowerShell window.
 
 ---
 

@@ -1,0 +1,12 @@
+[project]
+name = "fluency-ai"
+version = "1.0.0"
+description = "Local AI-powered English conversation partner"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastrtc[stt]>=0.0.19",
+    "kokoro-onnx>=0.4.7",
+    "loguru>=0.7.3",
+    "ollama>=0.4.7",
+]
